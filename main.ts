@@ -23,8 +23,13 @@ interface Case {
 /** x clamped to [0,1] and rounded to 6 decimals (0, never -0). */
 const price6 = (x: number): number => Math.round(Math.min(1, Math.max(0, x)) * 1e6) / 1e6 + 0;
 
-/** Estimate per-market volatility (sigma) adaptively from recent 1-minute returns. */
+/**
+ * Estimate per-market volatility (sigma) adaptively from recent 1-minute returns.
+ * Uses a sliding window of up to 120 minutes of 1-minute returns, calculating
+ * the standard deviation of returns and clamping the resulting sigma to [0.0012, 0.009].
+ */
 function estimateSigma(prices: number[]): number {
+  if (prices.length < 2) return 0.0025;
   const windowSize = 120;
   const recent = prices.slice(-Math.min(prices.length, windowSize));
   const returns: number[] = [];
